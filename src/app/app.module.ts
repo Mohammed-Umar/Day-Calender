@@ -18,11 +18,13 @@ import {
   MatInputModule,
   MatSelectModule } from '@angular/material';
 import { PopupComponent } from './popup/popup.component';
+import { EventComponent } from './event/event.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    PopupComponent
+    PopupComponent,
+    EventComponent
   ],
   entryComponents: [PopupComponent],
   imports: [

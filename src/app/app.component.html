@@ -13,10 +13,23 @@
                 <tbody *ngFor="let x of time; let i = index">
                   <tr *ngIf="drawLine(i)">
                     <th scope="row">{{x}}</th>
-                    <td></td>
+                    <td>
+                      <app-event [eventData]="eventData" [currentIndex]="i" [rowValue]="x"></app-event>
+                    </td>
                   </tr>
                 </tbody>
               </table>
+              <!-- <div class="row">
+                  <div class="col-xs-6">
+                    <div>Big Image Goes Here</div>
+                  </div>
+                  <div class="col-xs-6">
+                    <div class="col-xs-12">Little Image #1</div>
+                    <div class="col-xs-12">Little Image #2</div>
+                    <div class="col-xs-12">Little Image #3</div>
+                    <div class="col-xs-12">Little Image #4</div>
+                  </div>
+                </div> -->
         </div>
       </div>
     </div>

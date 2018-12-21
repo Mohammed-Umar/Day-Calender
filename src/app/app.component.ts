@@ -1,3 +1,9 @@
+/*
+Add a logic in this component to compare the currentIndex with colspan.
+Add 12 td's in eventComponent
+Save the events data somewhere
+when events overlap devide one td into to td's one small and one big and even merge td's
+*/
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material';
 
@@ -12,6 +18,8 @@ export class AppComponent implements OnInit {
   eventName: string;
   eventStartTime: TimeObj;
   eventEndTime: TimeObj;
+
+  newEventLength: any;
 
   hours: Array<any> = [];
   mins: Array<any> = [];
@@ -56,6 +64,9 @@ export class AppComponent implements OnInit {
     const indexOfStartTime = this.time.indexOf(startTime);
     const indexofEndTime = this.time.indexOf(endTime);
     const length = indexofEndTime - indexOfStartTime;
+    this.eventData.eventLength = length;
+    this.eventData.startTimeIndex = indexOfStartTime;
+    this.eventData.endTimeIndex = indexofEndTime;
     console.log('length of the event is:::', length);
   }
 
@@ -86,9 +97,12 @@ export interface PopupData {
   eventName: string;
   eventStartTime: TimeObj;
   eventEndTime: TimeObj;
+  startTimeIndex: number;
+  endTimeIndex: number;
   hours: Array<any>;
   mins: Array<any>;
   time: Array<any>;
+  eventLength: number;
 }
 
 export interface TimeObj {

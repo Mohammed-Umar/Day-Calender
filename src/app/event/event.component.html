@@ -1,0 +1,20 @@
+<p *ngIf="!checkIfEvent()">
+  No event here.
+</p>
+
+
+<div class="card" *ngIf="checkIfEvent()">
+    <div class="card-header">
+      <div class="row">
+        <div class="col-md-8">
+          <h4 class="card-title">{{eventData?.eventName}}</h4>
+          <!-- <p class="card-category">Fill all the fields</p> -->
+        </div>
+        <div class="col-md-1">
+          <a (click)="cancelEvent()">
+            <i class="material-icons pull-right">close</i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
