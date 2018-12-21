@@ -6,11 +6,25 @@
       </li>
     </ul> -->
 
-    <div *ngFor="let x of time">
+    <div>
       <div class="row">
         <div class="col-md-12">
             <!-- <h5>{{x}}</h5> -->
-            <hr style="border: 1px solid #000; width: 100%">
+            <!-- <hr style="border: 1px solid #000; width: 100%"> -->
+            <table class="table">
+                <thead>
+                  <tr class="row">
+                    <th scope="col" class="col-md-2">Time</th>
+                    <th scope="col" class="col-md-10">Events</th>
+                  </tr>
+                </thead>
+                <tbody *ngFor="let x of time; let i = index">
+                  <tr *ngIf="drawLine(i)">
+                    <th scope="row">{{x}}</th>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
         </div>
       </div>
     </div>
