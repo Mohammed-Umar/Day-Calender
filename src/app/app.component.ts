@@ -30,6 +30,10 @@ export class AppComponent implements OnInit {
 
   eventData: PopupData;
 
+  localStorageData: Array<any> = [];
+
+  localStorageVariable = 'data';
+
   timeData = {
     hours: this.hours,
     mins: this.mins,
@@ -40,10 +44,18 @@ export class AppComponent implements OnInit {
   constructor(public popup: MatDialog) {}
 
   ngOnInit() {
+    localStorage.setItem(this.localStorageVariable, JSON.stringify(this.localStorageData));
     this.generateHoursAndMins();
     console.log(this.hours);
     console.log(this.mins);
     console.log(this.hourly);
+    // const localData = localStorage.getItem(this.localStorageVariable);
+    // const data = JSON.parse(localData);
+    // console.log(data);
+
+    // if (data.length === 0 ) {
+    //   console.log(data.length);
+    // }
   }
 
   openPopup(): void {
@@ -79,6 +91,8 @@ export class AppComponent implements OnInit {
     this.eventData.startTimeIndex = indexOfStartTime;
     this.eventData.endTimeIndex = indexofEndTime;
     console.log('length of the event is:::', length);
+    this.localStorageData.push(this.eventData);
+    localStorage.setItem(this.localStorageVariable, JSON.stringify(this.localStorageData));
     this.time = this.time.map((e) => e);
     // this.handleRowspan(this.eventData);
   }
@@ -136,46 +150,74 @@ export class AppComponent implements OnInit {
   }
 
   divide(currentRowTime) {
-    const currentTimeIndex = this.time.indexOf(currentRowTime);
     if (this.colspan > 1) {
       this.colspan--;
       return false;
     }
-    if (this.eventData !== undefined) {
-      const eventStartIndex = this.eventData.startTimeIndex;
-      const eventEndIndex = this.eventData.endTimeIndex;
-      const eventLength = this.eventData.eventLength;
-      const nextRowIndex = currentTimeIndex + 12;
+    const currentRowIndex = this.time.indexOf(currentRowTime);
+    const nextRowIndex = currentRowIndex + 12;
+    const localData = localStorage.getItem(this.localStorageVariable);
+    const data = JSON.parse(localData);
+    if (data.length > 0 ) {
+      data.map(event => {
+        const eventStartIndex = event.startTimeIndex;
+        const eventEndIndex = event.endTimeIndex;
+        const eventLength = event.eventLength;
 
-      if (currentTimeIndex > eventEndIndex) {
-        return true;
-      }
+        if (currentRowIndex > eventEndIndex) {
+          this.colspan = 1;
+          return true;
+        }
 
-      if ( currentTimeIndex >= eventStartIndex && currentTimeIndex < eventEndIndex) {
-        const x = this.hourly.filter(elm => {
-          const i = this.time.indexOf(elm);
-          return i < eventEndIndex && i > eventStartIndex;
-        });
-        const spanLength = x.length;
-        console.log('x..................', x);
-        this.colspan = spanLength === 0 ? 1 : spanLength + 1;
-        console.log('colspan........', this.colspan);
-        return true;
-      }
-      // if ( index % 12 === 0 ) {
-
-        // const i = 0;
-
-        // while (i < eventEndIndex) {
-
-        // }
-
-
-        // if (eventStartIndex >= currentTimeIndex && eventEndIndex > nextRowIndex) {
-
-        // }
-      // }
+        if ( currentRowIndex >= eventStartIndex && currentRowIndex < eventEndIndex) {
+          const x = this.hourly.filter(elm => {
+            const i = this.time.indexOf(elm);
+            return i < eventEndIndex && i > eventStartIndex;
+          });
+          const spanLength = x.length;
+          console.log('x..................', x);
+          this.colspan = spanLength === 0 ? 1 : spanLength + 1;
+          console.log('colspan........', this.colspan);
+          return true;
+        }
+      });
+      return true;
     }
+    // if (this.eventData !== undefined) {
+    //   const eventStartIndex = this.eventData.startTimeIndex;
+    //   const eventEndIndex = this.eventData.endTimeIndex;
+    //   const eventLength = this.eventData.eventLength;
+    //   // const nextRowIndex = currentRowIndex + 12;
+
+    //   if (currentRowIndex > eventEndIndex) {
+    //     return true;
+    //   }
+
+    //   if ( currentRowIndex >= eventStartIndex && currentRowIndex < eventEndIndex) {
+    //     const x = this.hourly.filter(elm => {
+    //       const i = this.time.indexOf(elm);
+    //       return i < eventEndIndex && i > eventStartIndex;
+    //     });
+    //     const spanLength = x.length;
+    //     console.log('x..................', x);
+    //     this.colspan = spanLength === 0 ? 1 : spanLength + 1;
+    //     console.log('colspan........', this.colspan);
+    //     return true;
+    //   }
+    //   // if ( index % 12 === 0 ) {
+
+    //     // const i = 0;
+
+    //     // while (i < eventEndIndex) {
+
+    //     // }
+
+
+    //     // if (eventStartIndex >= currentRowIndex && eventEndIndex > nextRowIndex) {
+
+    //     // }
+    //   // }
+    // }
     this.colspan = 1;
     return true;
     // return index % 12 === 0 ? true : false;
