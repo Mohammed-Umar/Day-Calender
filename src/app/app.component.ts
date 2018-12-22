@@ -24,8 +24,18 @@ export class AppComponent implements OnInit {
   hours: Array<any> = [];
   mins: Array<any> = [];
   time: Array<any> = [];
+  hourly: Array<any> = [];
+
+  colspan = 1;
 
   eventData: PopupData;
+
+  timeData = {
+    hours: this.hours,
+    mins: this.mins,
+    hourly: this.hourly,
+    time: this.time
+  };
 
   constructor(public popup: MatDialog) {}
 
@@ -33,6 +43,7 @@ export class AppComponent implements OnInit {
     this.generateHoursAndMins();
     console.log(this.hours);
     console.log(this.mins);
+    console.log(this.hourly);
   }
 
   openPopup(): void {
@@ -68,6 +79,15 @@ export class AppComponent implements OnInit {
     this.eventData.startTimeIndex = indexOfStartTime;
     this.eventData.endTimeIndex = indexofEndTime;
     console.log('length of the event is:::', length);
+    this.time = this.time.map((e) => e);
+    // this.handleRowspan(this.eventData);
+  }
+
+  handleRowspan(data) {
+    const eventStartIndex = data.startTimeIndex;
+    const eventEndIndex = data.endTimeIndex;
+    const length = this.time.length;
+    const x = eventStartIndex / 12;
   }
 
   generateHoursAndMins() {
@@ -86,9 +106,98 @@ export class AppComponent implements OnInit {
         this.time.push(this.hours[i] + ':' + this.mins[j]);
       }
     }
+    for (let i = 0; i < this.time.length; i++) {
+      if (i % 12 === 0) {
+        this.hourly.push(this.time[i]);
+      }
+    }
   }
 
+  provideRowspan(currentValue) {
+    if (this.eventData === undefined) {
+      return 1;
+    }
+    const currentRowIndex = this.eventData.time.indexOf(currentValue);
+    const nextRowIndex = currentRowIndex + 12;
+    const eventStartIndex = this.eventData.startTimeIndex;
+    const eventEndIndex = this.eventData.endTimeIndex;
+    // starttime is between the currentIndex and NexINdex and endTime is greater than nextIndex then rowspan = 2 or else 1
+    if (eventStartIndex >= currentRowIndex && eventEndIndex > nextRowIndex) {
+      return 2;
+    }
+    // if (currentRowIndex >= eventStartIndex && currentRowIndex <= eventEndIndex) {
+      // start at 18
+      // end at 30
+      // current is 24
+      // then rowspan should be 2
+    // }
+    return 1;
+
+  }
+
+  divide(currentRowTime) {
+    const currentTimeIndex = this.time.indexOf(currentRowTime);
+    if (this.colspan > 1) {
+      this.colspan--;
+      return false;
+    }
+    if (this.eventData !== undefined) {
+      const eventStartIndex = this.eventData.startTimeIndex;
+      const eventEndIndex = this.eventData.endTimeIndex;
+      const eventLength = this.eventData.eventLength;
+      const nextRowIndex = currentTimeIndex + 12;
+
+      if (currentTimeIndex > eventEndIndex) {
+        return true;
+      }
+
+      if ( currentTimeIndex >= eventStartIndex && currentTimeIndex < eventEndIndex) {
+        const x = this.hourly.filter(elm => {
+          const i = this.time.indexOf(elm);
+          return i < eventEndIndex && i > eventStartIndex;
+        });
+        const spanLength = x.length;
+        console.log('x..................', x);
+        this.colspan = spanLength === 0 ? 1 : spanLength + 1;
+        console.log('colspan........', this.colspan);
+        return true;
+      }
+      // if ( index % 12 === 0 ) {
+
+        // const i = 0;
+
+        // while (i < eventEndIndex) {
+
+        // }
+
+
+        // if (eventStartIndex >= currentTimeIndex && eventEndIndex > nextRowIndex) {
+
+        // }
+      // }
+    }
+    this.colspan = 1;
+    return true;
+    // return index % 12 === 0 ? true : false;
+  }
+
+  showHour(currentRowTime) {
+    return true;
+  }
+  // set rowspan in this function
   drawLine(index) {
+    if (this.eventData !== undefined) {
+      const eventStartIndex = this.eventData.startTimeIndex;
+      const eventEndIndex = this.eventData.endTimeIndex;
+      // const currentRowIndex = index / 12;
+      if ( index % 12 === 0 ) {
+        const nextRowIndex = index + 12;
+        if (eventStartIndex >= index && eventEndIndex > nextRowIndex) {
+          this.colspan = 2;
+          console.log('colspan........', this.colspan);
+        }
+      }
+    }
     return index % 12 === 0 ? true : false;
   }
 }

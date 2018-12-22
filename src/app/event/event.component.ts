@@ -10,7 +10,7 @@ export class EventComponent implements OnInit, OnChanges {
 
   @Input() eventData;
 
-  @Input() currentIndex;
+  @Input() timeData;
 
   @Input() rowValue;
 
@@ -18,13 +18,13 @@ export class EventComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     console.log('OnInit', this.eventData);
-    console.log('OnInit', this.currentIndex);
+    // console.log('OnInit', this.currentIndex);
     console.log('OnInit', this.rowValue);
   }
 
   ngOnChanges() {
     console.log('OnChanges', this.eventData);
-    console.log('OnChanges', this.currentIndex);
+    // console.log('OnChanges', this.currentIndex);
     console.log('OnChanges', this.rowValue);
   }
 
