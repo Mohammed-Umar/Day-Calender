@@ -80,7 +80,7 @@ export class AppComponent implements OnInit, AfterContentChecked {
     time: this.time
   };
 
-  constructor(public popup: MatDialog, private _cdRef: ChangeDetectorRef) {}
+  constructor(public popup: MatDialog, private _cdRef: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.generateHoursAndMins();
@@ -130,12 +130,40 @@ export class AppComponent implements OnInit, AfterContentChecked {
     this.eventData.startTimeIndex = indexOfStartTime;
     this.eventData.endTimeIndex = indexofEndTime;
     this.eventData.isOverlapEvent = this.checkIfOverlaping(data);
-    this.eventData.eventLeft = this.eventLeft;
-    this.eventData.eventWidth = this.eventWidth;
+    this.eventData.eventLeft = 0;
+    this.eventData.eventWidth = 100;
+    if (this.eventData.isOverlapEvent) {
+      this.eventData.eventLeft = this.setEventLeft(data);
+      this.eventData.eventWidth = this.setEventWidth(data);
+    }
     console.log('length of the event is:::', length);
     dataToStore.push(this.eventData);
     localStorage.setItem(this.localStorageVariable, JSON.stringify(dataToStore));
     // this.time = this.time.map((e) => e);
+  }
+
+  setEventLeft(event) {
+    const data = localStorage.getItem(this.localStorageVariable);
+    const localData = JSON.parse(data);
+    const parentEvent = localData.find(obj => {
+      return this._oneInAnotherCondition1(event, obj) ||
+      this._oneInAnotherCondition2(event, obj) ||
+      this._partialOverlapCondition1(event, obj) ||
+      this._partialOverlapCOndition2(event, obj);
+    });
+    return parentEvent.eventLeft + 15;
+  }
+
+  setEventWidth(event) {
+    const data = localStorage.getItem(this.localStorageVariable);
+    const localData = JSON.parse(data);
+    const parentEvent = localData.find(obj => {
+      return this._oneInAnotherCondition1(event, obj) ||
+      this._oneInAnotherCondition2(event, obj) ||
+      this._partialOverlapCondition1(event, obj) ||
+      this._partialOverlapCOndition2(event, obj);
+    });
+    return parentEvent.eventWidth - 15;
   }
 
   haveEvents() {
@@ -172,7 +200,7 @@ export class AppComponent implements OnInit, AfterContentChecked {
   }
 
   generateFilteredArray(eventsArray) {
-    return eventsArray.reduce( (newArray, event) => {
+    return eventsArray.reduce((newArray, event) => {
       if (this.checkedEvents.length > 0) {
         const filter = this.checkedEvents.some(obj => {
           return obj.startTimeIndex === event.startTimeIndex && obj.endTimeIndex === event.endTimeIndex;
@@ -191,8 +219,8 @@ export class AppComponent implements OnInit, AfterContentChecked {
   checkAndShowEvent(index, currentEvent) {
     if (currentEvent.startTimeIndex === index) {
       if (currentEvent.isOverlapEvent) {
-        this.eventLeft = this.eventLeft + 15;
-        this.eventWidth = this.eventWidth - 15;
+        this.eventLeft = currentEvent.eventLeft;
+        this.eventWidth = currentEvent.eventWidth;
       } else {
         this.eventLeft = 0;
         this.eventWidth = 100;
@@ -220,24 +248,39 @@ export class AppComponent implements OnInit, AfterContentChecked {
     });
   }
 
+  private _oneInAnotherCondition1 = (event, checkingObj) =>
+    event.startTimeIndex >= checkingObj.startTimeIndex && event.endTimeIndex < checkingObj.endTimeIndex
+
+  private _oneInAnotherCondition2 = (event, checkingObj) =>
+    event.endTimeIndex <= checkingObj.endTimeIndex && event.startTimeIndex > checkingObj.startTimeIndex
+
   isOneInAnother(event) {
     return this.checkedEvents.some(obj => {
-      if (event.startTimeIndex >= obj.startTimeIndex && event.endTimeIndex < obj.endTimeIndex) {
+      if (this._oneInAnotherCondition1(event, obj)) {
         return true;
       }
-      if (event.endTimeIndex <= obj.endTimeIndex && event.startTimeIndex > obj.startTimeIndex) {
+      if (this._oneInAnotherCondition2(event, obj)) {
         return true;
       }
       return false;
     });
   }
 
+  private _partialOverlapCondition1 = (event, checkingObj) =>
+    event.startTimeIndex >= checkingObj.startTimeIndex && event.startTimeIndex < checkingObj.endTimeIndex &&
+    event.endTimeIndex > checkingObj.endTimeIndex
+
+  private _partialOverlapCOndition2 = (event, checkingObj) =>
+    event.endTimeIndex <= checkingObj.endTimeIndex && event.endTimeIndex > checkingObj.startTimeIndex && event.startTimeIndex < checkingObj.startTimeIndex
+
+
+
   isSomePartOverlaping(event) {
     return this.checkedEvents.some(obj => {
-      if (event.startTimeIndex >= obj.startTimeIndex && event.startTimeIndex < obj.endTimeIndex && event.endTimeIndex > obj.endTimeIndex) {
+      if (this._partialOverlapCondition1(event, obj)) {
         return true;
       }
-      if (event.endTimeIndex <= obj.endTimeIndex && event.endTimeIndex > obj.startTimeIndex && event.startTimeIndex < obj.startTimeIndex) {
+      if (this._partialOverlapCOndition2(event, obj)) {
         return true;
       }
       return false;
@@ -275,7 +318,7 @@ export class AppComponent implements OnInit, AfterContentChecked {
   }
 
   findNextHourIndex(index) {
-    const allNextHours = this.hourly.filter( hour => {
+    const allNextHours = this.hourly.filter(hour => {
       const hourIndex = this.time.indexOf(hour);
       return hourIndex > index;
     });
