@@ -149,7 +149,7 @@ export class AppComponent implements OnInit, AfterContentChecked {
       return this._oneInAnotherCondition1(event, obj) ||
       this._oneInAnotherCondition2(event, obj) ||
       this._partialOverlapCondition1(event, obj) ||
-      this._partialOverlapCOndition2(event, obj);
+      this._partialOverlapCondition2(event, obj);
     });
     return parentEvent.eventLeft + 15;
   }
@@ -161,9 +161,19 @@ export class AppComponent implements OnInit, AfterContentChecked {
       return this._oneInAnotherCondition1(event, obj) ||
       this._oneInAnotherCondition2(event, obj) ||
       this._partialOverlapCondition1(event, obj) ||
-      this._partialOverlapCOndition2(event, obj);
+      this._partialOverlapCondition2(event, obj);
     });
     return parentEvent.eventWidth - 15;
+  }
+
+  deleteEvent(event) {
+    const data = localStorage.getItem(this.localStorageVariable);
+    const localData = JSON.parse(data);
+    const updatedArray = localData.filter(obj => {
+      return !this._isExistCondition(event, obj);
+    });
+    localStorage.setItem(this.localStorageVariable, JSON.stringify(updatedArray));
+    this.eventsArrayNew = updatedArray;
   }
 
   haveEvents() {
@@ -270,45 +280,29 @@ export class AppComponent implements OnInit, AfterContentChecked {
     event.startTimeIndex >= checkingObj.startTimeIndex && event.startTimeIndex < checkingObj.endTimeIndex &&
     event.endTimeIndex > checkingObj.endTimeIndex
 
-  private _partialOverlapCOndition2 = (event, checkingObj) =>
+  private _partialOverlapCondition2 = (event, checkingObj) =>
     event.endTimeIndex <= checkingObj.endTimeIndex && event.endTimeIndex > checkingObj.startTimeIndex && event.startTimeIndex < checkingObj.startTimeIndex
-
-
 
   isSomePartOverlaping(event) {
     return this.checkedEvents.some(obj => {
       if (this._partialOverlapCondition1(event, obj)) {
         return true;
       }
-      if (this._partialOverlapCOndition2(event, obj)) {
+      if (this._partialOverlapCondition2(event, obj)) {
         return true;
       }
       return false;
     });
   }
 
+  private _isExistCondition = (event, checkingObj) =>
+    event.startTimeIndex === checkingObj.startTimeIndex && event.endTimeIndex === checkingObj.endTimeIndex
+
   isAlreadyExist(event) {
     return this.checkedEvents.some(obj => {
       return event.startTimeIndex === obj.startTimeIndex && event.endTimeIndex === obj.endTimeIndex;
     });
   }
-
-  /*
-
-           this.isOverlaping = this.checkedEvents.some(checkedEvent => {
-          if (currentEvent.startTimeIndex >= checkedEvent.startTimeIndex &&
-            currentEvent.startTimeIndex < checkedEvent.endTimeIndex) {
-              if (currentEvent.endTimeIndex !== checkedEvent.endTimeIndex &&
-                currentEvent.startTimeIndex !== checkedEvent.startTimeIndex) {
-                  return true;
-                } else {
-                  return false;
-                }
-            }
-            // return false;
-        });
-
-  */
 
   isCheckedEvent(index) {
     const isEventChecked = this.checkedEvents.some(obj => {
