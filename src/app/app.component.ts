@@ -16,7 +16,7 @@ import { listLazyRoutes } from '@angular/compiler/src/aot/lazy_routes';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit, AfterContentChecked {
-  eventName: string;
+  eventName = '(No title)';
   eventStartTime: TimeObj;
   eventEndTime: TimeObj;
 
@@ -51,7 +51,13 @@ export class AppComponent implements OnInit, AfterContentChecked {
 
   eventTop: number;
 
+  eventLeft = 0;
+
+  eventWidth = 100;
+
   overlayTop = 50;
+
+  isOverlaping = false;
 
   // Temp Variables
 
@@ -78,7 +84,6 @@ export class AppComponent implements OnInit, AfterContentChecked {
 
   ngOnInit() {
     this.generateHoursAndMins();
-    // localStorage.setItem(this.localStorageVariable, JSON.stringify(this.localStorageData));
     const localData = localStorage.getItem(this.localStorageVariable);
     if (localData === 'undefined' || localData === null) {
       const dataToStore = [];
@@ -86,13 +91,6 @@ export class AppComponent implements OnInit, AfterContentChecked {
     } else {
       this.eventsArrayNew = JSON.parse(localData);
     }
-    // const localData = localStorage.getItem(this.localStorageVariable);
-    // const data = JSON.parse(localData);
-    // console.log(data);
-
-    // if (data.length === 0 ) {
-    //   console.log(data.length);
-    // }
   }
 
   openPopup(): void {
@@ -119,6 +117,9 @@ export class AppComponent implements OnInit, AfterContentChecked {
   }
 
   calculateNewEventLength(data) {
+    // if (this.isAlreadyExist(data)) {
+
+    // }
     const dataToStore = this.eventsArrayNew;
     const startTime = data.eventStartTime;
     const endTime = data.eventEndTime;
@@ -128,25 +129,19 @@ export class AppComponent implements OnInit, AfterContentChecked {
     this.eventData.eventLength = length;
     this.eventData.startTimeIndex = indexOfStartTime;
     this.eventData.endTimeIndex = indexofEndTime;
+    this.eventData.isOverlapEvent = this.checkIfOverlaping(data);
+    this.eventData.eventLeft = this.eventLeft;
+    this.eventData.eventWidth = this.eventWidth;
     console.log('length of the event is:::', length);
-    // this.localStorageData.push(this.eventData);
     dataToStore.push(this.eventData);
     localStorage.setItem(this.localStorageVariable, JSON.stringify(dataToStore));
     // this.time = this.time.map((e) => e);
-    // this.handleRowspan(this.eventData);
   }
 
   haveEvents() {
     const data = localStorage.getItem(this.localStorageVariable);
     const localData = JSON.parse(data);
     return localData.length > 0 ? true : false;
-  }
-
-  handleRowspan(data) {
-    const eventStartIndex = data.startTimeIndex;
-    const eventEndIndex = data.endTimeIndex;
-    const length = this.time.length;
-    const x = eventStartIndex / 12;
   }
 
   generateHoursAndMins() {
@@ -172,111 +167,6 @@ export class AppComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  provideRowspan(currentValue) {
-    if (this.eventData === undefined) {
-      return 1;
-    }
-    const currentRowIndex = this.eventData.time.indexOf(currentValue);
-    const nextRowIndex = currentRowIndex + 12;
-    const eventStartIndex = this.eventData.startTimeIndex;
-    const eventEndIndex = this.eventData.endTimeIndex;
-    // starttime is between the currentIndex and NexINdex and endTime is greater than nextIndex then rowspan = 2 or else 1
-    if (eventStartIndex >= currentRowIndex && eventEndIndex > nextRowIndex) {
-      return 2;
-    }
-    // if (currentRowIndex >= eventStartIndex && currentRowIndex <= eventEndIndex) {
-      // start at 18
-      // end at 30
-      // current is 24
-      // then rowspan should be 2
-    // }
-    return 1;
-  }
-
-  divide(currentRowTime, rowIndex) {
-    if (this.eventRowSpan > 1) {
-      this.eventRowSpan--;
-      return false;
-    }
-    // const currentRowIndex = this.time.indexOf(currentRowTime);
-    // const nextRowIndex = currentRowIndex + 12;
-    const localData = localStorage.getItem(this.localStorageVariable);
-    const data = JSON.parse(localData);
-    let dataLength = data.length;
-    if (dataLength > 0 ) {
-      data.map(event => {
-        const eventStartIndex = event.startTimeIndex;
-        const eventEndIndex = event.endTimeIndex;
-        const eventLength = event.eventLength;
-        const allNextHours = this.hourly.filter( hour => {
-          const hourIndex = this.time.indexOf(hour);
-          return hourIndex > rowIndex;
-        });
-        const nextHour = Math.min(...allNextHours);
-        const nextHourIndex = this.time.indexOf(nextHour);
-        const filterHourly = this.hourly.filter(hour => hour === currentRowTime);
-        let isHourStart: boolean;
-        if (filterHourly.length > 0) {
-          isHourStart = true;
-        } else {
-          isHourStart = false;
-        }
-        if (rowIndex > eventStartIndex && rowIndex < eventEndIndex) {
-          // dataLength --;
-          return true;
-        }
-        if (nextHourIndex < eventStartIndex) {
-          this.hourlySpan(rowIndex);
-          return true;
-        }
-        if (rowIndex < eventStartIndex && eventStartIndex < nextHourIndex) {
-          this.eventRowSpan = eventStartIndex - rowIndex;
-          // dataLength --;
-          return true;
-        }
-        // if (rowIndex === eventStartIndex) {
-        //   this.eventRowSpan = eventLength + 1;
-        //   dataLength --;
-        //   return true;
-        // }
-        if (rowIndex === eventEndIndex && !isHourStart) {
-          this.eventRowSpan = nextHourIndex - rowIndex;
-          // dataLength --;
-          return true;
-        }
-        // if (rowIndex > eventEndIndex) {
-        //   this.eventRowSpan = 1;
-        //   return true;
-        // }
-
-        // if ( rowIndex >= eventStartIndex && rowIndex < eventEndIndex) {
-        //   const x = this.hourly.filter(elm => {
-        //     const i = this.time.indexOf(elm);
-        //     return i < eventEndIndex && i > eventStartIndex;
-        //   });
-        //   const spanLength = x.length;
-        //   console.log('x..................', x);
-        //   this.eventRowSpan = spanLength === 0 ? 1 : spanLength + 1;
-        //   console.log('eventRowSpan........', this.eventRowSpan);
-        //   return true;
-        // }
-      });
-      // return true;
-    } else {
-      // const x = this.hourly.map(hour => {
-      //   const hourIndex = this.time.indexOf(hour);
-      //   if (rowIndex === hourIndex) {
-      //     this.eventRowSpan = 12;
-      //   }
-      //   // return true;
-      // });
-      this.hourlySpan(rowIndex);
-      return true;
-    }
-    // this.eventRowSpan = 1;
-    // return true;
-  }
-
   ngAfterContentChecked() {
     this._cdRef.detectChanges();
   }
@@ -298,112 +188,84 @@ export class AppComponent implements OnInit, AfterContentChecked {
     }, []);
   }
 
-  showEvents(currentTime, index) {
-    if (this.eventRowSpan > 1) {
-      this.eventRowSpan --;
-      return false;
-    }
-    const localData = localStorage.getItem(this.localStorageVariable);
-    const data = JSON.parse(localData);
-    // this.toCheckEvents = data;
-    const filteredArray = this.generateFilteredArray(data);
-    const datalength = this.toCheckEvents.length;
-    if (datalength > 0) {
-      return this.eventSpan(this.toCheckEvents, filteredArray, currentTime, index);
-      // return true;
-    }
-    return this.hourlySpan(index);
-  }
-
-  showAllEvents(index) {
-    const data = localStorage.getItem(this.localStorageVariable);
-    const localData = JSON.parse(data);
-    this.toCheckEvents = localData;
-    // let filteredArray = localData;
-    // if (this.lastEventIndex !== index) {
-    //   filteredArray = this.generateFilteredArray(localData);
-    // }
-    // const dataLength = localData.length;
-    // for (let i = 0; i < dataLength; i++) {
-    //   this.xTime = localData[i].startTimeIndex;
-    //   if (localData[i].startTimeIndex === index) {
-    //     const eventLength = localData[i].eventLength;
-    //     this.eventHeight = eventLength * this.default5MinRowLength;
-    //     this.eventTop = this.overlayTop + (this.default5MinRowLength * index);
-    //     console.log('eventLength & event', eventLength, event);
-    //     console.log('function ran', this.x++);
-    //     this.checkedEvents.push(localData[i]);
-    //     this.lastEventIndex = index;
-    //     return true;
-    //   }
-    //   this.eventHeight = this.default5MinRowLength;
-    //   return false;
-    // }
-    /////////
-    let filteredArray = localData;
-    if (this.lastEventIndex !== index) {
-      filteredArray = this.generateFilteredArray(localData);
-    }
-    // const filteredArray = this.generateFilteredArray(localData);
-    const filteredLength = filteredArray.length;
-    const dataLength = localData.length;
-    for (let i = 0; i < filteredLength; i++) {
-      this.xTime = filteredArray[i].startTimeIndex;
-      if (filteredArray[i].startTimeIndex === index) {
-        const eventLength = filteredArray[i].eventLength;
-        this.eventHeight = eventLength * this.default5MinRowLength;
-        this.eventTop = this.overlayTop + (this.default5MinRowLength * index);
-        console.log('eventLength & event', eventLength, event);
-        console.log('function ran', this.x++);
-        this.checkedEvents.push(filteredArray[i]);
-        this.lastEventIndex = index;
-        return true;
+  checkAndShowEvent(index, currentEvent) {
+    if (currentEvent.startTimeIndex === index) {
+      if (currentEvent.isOverlapEvent) {
+        this.eventLeft = this.eventLeft + 15;
+        this.eventWidth = this.eventWidth - 15;
+      } else {
+        this.eventLeft = 0;
+        this.eventWidth = 100;
       }
-      this.eventHeight = this.default5MinRowLength;
-      return false;
+      const eventLength = currentEvent.eventLength;
+      this.eventHeight = eventLength * this.default5MinRowLength;
+      this.eventTop = this.overlayTop + (this.default5MinRowLength * index);
+      console.log('eventLength & event', eventLength, event);
+      console.log('function ran', this.x++);
+      this.checkedEvents.push(currentEvent);
+      this.lastEventIndex = index;
+      return true;
     }
     this.eventHeight = this.default5MinRowLength;
     return false;
-    /////////
-    // const checkEvent = localData.map(event => {
-    //   this.xTime = event.startTimeIndex;
-    //   const isEventChecked = this.checkedEvents.some(obj => {
-    //     return obj.startTimeIndex === event.startTimeIndex && obj.endTimeIndex === event.endTimeIndex;
-    //   });
-    //   if (event.startTimeIndex === index) {
-    //     const lastIndex = event.endTimeIndex;
-    //     const eventLength = event.eventLength;
-    //     this.eventHeight = eventLength * this.default5MinRowLength;
-    //     this.eventTop = this.overlayTop + (this.default5MinRowLength * index);
-    //     console.log('eventLength & event', eventLength, event);
-    //     console.log('function ran', this.x++);
-    //     this.checkedEvents.push(event);
-    //     this.lastEventIndex = index;
-    //     return true;
-    //   }
-    //   this.eventHeight = this.default5MinRowLength;
-    //   return false;
-    // });
-    // return checkEvent[0];
   }
-
-  checkAndShowEvent(index, currentEvent) {
-    // for (let i = 0; i < dataLength; i++) {
-      this.xTime = currentEvent.startTimeIndex;
-      if (currentEvent.startTimeIndex === index) {
-        const eventLength = currentEvent.eventLength;
-        this.eventHeight = eventLength * this.default5MinRowLength;
-        this.eventTop = this.overlayTop + (this.default5MinRowLength * index);
-        console.log('eventLength & event', eventLength, event);
-        console.log('function ran', this.x++);
-        this.checkedEvents.push(currentEvent);
-        this.lastEventIndex = index;
+  checkIfOverlaping(event) {
+    return this.checkedEvents.some(obj => {
+      if (this.isOneInAnother(event) || this.isSomePartOverlaping(event)) {
+        this.isOverlaping = true;
         return true;
       }
-      this.eventHeight = this.default5MinRowLength;
+      this.isOverlaping = false;
       return false;
-    // }
+    });
   }
+
+  isOneInAnother(event) {
+    return this.checkedEvents.some(obj => {
+      if (event.startTimeIndex >= obj.startTimeIndex && event.endTimeIndex < obj.endTimeIndex) {
+        return true;
+      }
+      if (event.endTimeIndex <= obj.endTimeIndex && event.startTimeIndex > obj.startTimeIndex) {
+        return true;
+      }
+      return false;
+    });
+  }
+
+  isSomePartOverlaping(event) {
+    return this.checkedEvents.some(obj => {
+      if (event.startTimeIndex >= obj.startTimeIndex && event.startTimeIndex < obj.endTimeIndex && event.endTimeIndex > obj.endTimeIndex) {
+        return true;
+      }
+      if (event.endTimeIndex <= obj.endTimeIndex && event.endTimeIndex > obj.startTimeIndex && event.startTimeIndex < obj.startTimeIndex) {
+        return true;
+      }
+      return false;
+    });
+  }
+
+  isAlreadyExist(event) {
+    return this.checkedEvents.some(obj => {
+      return event.startTimeIndex === obj.startTimeIndex && event.endTimeIndex === obj.endTimeIndex;
+    });
+  }
+
+  /*
+
+           this.isOverlaping = this.checkedEvents.some(checkedEvent => {
+          if (currentEvent.startTimeIndex >= checkedEvent.startTimeIndex &&
+            currentEvent.startTimeIndex < checkedEvent.endTimeIndex) {
+              if (currentEvent.endTimeIndex !== checkedEvent.endTimeIndex &&
+                currentEvent.startTimeIndex !== checkedEvent.startTimeIndex) {
+                  return true;
+                } else {
+                  return false;
+                }
+            }
+            // return false;
+        });
+
+  */
 
   isCheckedEvent(index) {
     const isEventChecked = this.checkedEvents.some(obj => {
@@ -439,138 +301,6 @@ export class AppComponent implements OnInit, AfterContentChecked {
     }
     return isHourStart;
   }
-
-  // after changing span for 1 event that event must not be checked again
-  eventSpan(checkList, filteredArray, currentRowTime, currentTimeIndex): boolean {
-    return checkList.map(event => {
-      const eventStartIndex = event.startTimeIndex;
-      const eventEndIndex = event.endTimeIndex;
-      const eventLength = event.eventLength;
-      const nextHourIndex = this.findNextHourIndex(currentTimeIndex);
-      const lastHourINdex = this.findLastHourINdex(currentTimeIndex);
-      const isHourStart = this.findIsHourStart(currentRowTime);
-      const nextHourAfterEventStart = this.findNextHourIndex(eventStartIndex);
-      const nextHourAfterEventEnd = this.findNextHourIndex(eventEndIndex);
-      const isEventChecked = this.checkedEvents.some(obj => {
-        return obj.startTimeIndex === event.startTimeIndex && obj.endTimeIndex === event.endTimeIndex;
-      });
-      if (isEventChecked && isHourStart && currentTimeIndex >= eventEndIndex) {
-        return this.hourlySpan(currentTimeIndex);
-      }
-      if (isEventChecked && !isHourStart && currentTimeIndex === eventEndIndex) {
-        this.eventRowSpan = currentTimeIndex - nextHourIndex;
-        return true;
-      }
-      if (currentTimeIndex < eventStartIndex && nextHourIndex <= eventStartIndex) {
-        return this.hourlySpan(currentTimeIndex);
-      }
-      // if (currentTimeIndex === eventStartIndex && !isHourStart) {
-
-      // }
-      if (isHourStart && eventStartIndex < nextHourIndex && eventStartIndex !== currentTimeIndex && eventStartIndex > currentTimeIndex) {
-        this.eventRowSpan = (eventStartIndex - currentTimeIndex) ;
-        return true;
-      }
-      if (isEventChecked && !isHourStart && eventEndIndex === currentTimeIndex) {
-        this.eventRowSpan = currentTimeIndex - nextHourIndex;
-        return true;
-      }
-      if ( currentTimeIndex === eventStartIndex) {
-        console.log('checkList', this.toCheckEvents);
-        console.log('before', this.eventRowSpan);
-        this.eventRowSpan = eventLength;
-        // this.toCheckEvents.pop();
-        this.checkedEvents.push(event);
-        console.log('after', this.eventRowSpan);
-        console.log('checkList', this.toCheckEvents);
-        return true;
-      }
-      // if (currentTimeIndex === eventEndIndex + 1 && ) {}
-
-      // if (currentRowTime < eventStartIndex && nextHourIndex < eventStartIndex) {
-      //   return this.hourlySpan(currentRowTime);
-      // }
-      // if (eventStartIndex < nextHourIndex) {
-      //   this.eventRowSpan = eventLength + 1;
-      //   return true;
-      // }
-      // if (currentTimeIndex > eventStartIndex && currentTimeIndex < eventEndIndex) {
-      //   // dataLength --;
-      //   return true;
-      // }
-      // if (nextHourIndex < eventStartIndex) {
-      //   return this.hourlySpan(currentTimeIndex);
-      // }
-      // if (currentTimeIndex < eventStartIndex && eventStartIndex < nextHourIndex) {
-      //   this.eventRowSpan = eventStartIndex - currentTimeIndex;
-      //   // dataLength --;
-      //   return true;
-      // }
-      // // if (currentTimeIndex === eventStartIndex) {
-      // //   this.eventRowSpan = eventLength + 1;
-      // //   dataLength --;
-      // //   return true;
-      // // }
-      // if (currentTimeIndex === eventEndIndex && !isHourStart) {
-      //   this.eventRowSpan = nextHourIndex - currentTimeIndex;
-      //   // dataLength --;
-      //   return true;
-      // }
-    });
-  }
-
-  spanInit() {}
-
-  hourlySpan(rowIndex) {
-    // const x = this.hourly.map(hour => {
-    //   const hourIndex = this.time.indexOf(hour);
-    //   if (rowIndex === hourIndex) {
-    //     this.eventRowSpan = 12;
-    //   }
-    // });
-    const hourlyIndexes = this.hourly.map(hour => {
-      return this.time.indexOf(hour);
-    });
-    const checkCurrentIndex = hourlyIndexes.filter(i => i === rowIndex);
-    if (checkCurrentIndex.length > 0) {
-        this.eventRowSpan = 12;
-        return true;
-    }
-    return false;
-  }
-
-  showHour(currentRowTime, timeIndex) {
-    // if (this.timeRowSpan > 1) {
-    //   this.timeRowSpan --;
-    //   return false;
-    // }
-    const x = this.hourly.map(hour => {
-      const hourIndex = this.time.indexOf(hour);
-      if (timeIndex === hourIndex) {
-        this.timeRowSpan = 12;
-        return 12;
-      }
-      // return true;
-    });
-    return x;
-  }
-
-  // set eventRowSpan in this function
-  drawLine(index) {
-    if (this.eventData !== undefined) {
-      const eventStartIndex = this.eventData.startTimeIndex;
-      const eventEndIndex = this.eventData.endTimeIndex;
-      // const currentRowIndex = index / 12;
-      if ( index % 12 === 0 ) {
-        const nextRowIndex = index + 12;
-        if (eventStartIndex >= index && eventEndIndex > nextRowIndex) {
-          this.eventRowSpan = 2;
-          console.log('eventRowSpan........', this.eventRowSpan);
-        }
-      }
-    }
-    return index % 12 === 0 ? true : false;
-  }
 }
 
 export interface PopupData {
@@ -583,9 +313,348 @@ export interface PopupData {
   mins: Array<any>;
   time: Array<any>;
   eventLength: number;
+  isOverlapEvent: boolean;
+  eventLeft: number;
+  eventWidth: number;
 }
 
 export interface TimeObj {
   hours: any;
   mins: any;
 }
+
+
+
+
+  // showHour(currentRowTime, timeIndex) {
+  //   // if (this.timeRowSpan > 1) {
+  //   //   this.timeRowSpan --;
+  //   //   return false;
+  //   // }
+  //   const x = this.hourly.map(hour => {
+  //     const hourIndex = this.time.indexOf(hour);
+  //     if (timeIndex === hourIndex) {
+  //       this.timeRowSpan = 12;
+  //       return 12;
+  //     }
+  //     // return true;
+  //   });
+  //   return x;
+  // }
+
+
+    // // set eventRowSpan in this function
+    // drawLine(index) {
+    //   if (this.eventData !== undefined) {
+    //     const eventStartIndex = this.eventData.startTimeIndex;
+    //     const eventEndIndex = this.eventData.endTimeIndex;
+    //     // const currentRowIndex = index / 12;
+    //     if ( index % 12 === 0 ) {
+    //       const nextRowIndex = index + 12;
+    //       if (eventStartIndex >= index && eventEndIndex > nextRowIndex) {
+    //         this.eventRowSpan = 2;
+    //         console.log('eventRowSpan........', this.eventRowSpan);
+    //       }
+    //     }
+    //   }
+    //   return index % 12 === 0 ? true : false;
+    // }
+
+    // divide(currentRowTime, rowIndex) {
+    //   if (this.eventRowSpan > 1) {
+    //     this.eventRowSpan--;
+    //     return false;
+    //   }
+    //   // const currentRowIndex = this.time.indexOf(currentRowTime);
+    //   // const nextRowIndex = currentRowIndex + 12;
+    //   const localData = localStorage.getItem(this.localStorageVariable);
+    //   const data = JSON.parse(localData);
+    //   let dataLength = data.length;
+    //   if (dataLength > 0 ) {
+    //     data.map(event => {
+    //       const eventStartIndex = event.startTimeIndex;
+    //       const eventEndIndex = event.endTimeIndex;
+    //       const eventLength = event.eventLength;
+    //       const allNextHours = this.hourly.filter( hour => {
+    //         const hourIndex = this.time.indexOf(hour);
+    //         return hourIndex > rowIndex;
+    //       });
+    //       const nextHour = Math.min(...allNextHours);
+    //       const nextHourIndex = this.time.indexOf(nextHour);
+    //       const filterHourly = this.hourly.filter(hour => hour === currentRowTime);
+    //       let isHourStart: boolean;
+    //       if (filterHourly.length > 0) {
+    //         isHourStart = true;
+    //       } else {
+    //         isHourStart = false;
+    //       }
+    //       if (rowIndex > eventStartIndex && rowIndex < eventEndIndex) {
+    //         // dataLength --;
+    //         return true;
+    //       }
+    //       if (nextHourIndex < eventStartIndex) {
+    //         this.hourlySpan(rowIndex);
+    //         return true;
+    //       }
+    //       if (rowIndex < eventStartIndex && eventStartIndex < nextHourIndex) {
+    //         this.eventRowSpan = eventStartIndex - rowIndex;
+    //         // dataLength --;
+    //         return true;
+    //       }
+    //       // if (rowIndex === eventStartIndex) {
+    //       //   this.eventRowSpan = eventLength + 1;
+    //       //   dataLength --;
+    //       //   return true;
+    //       // }
+    //       if (rowIndex === eventEndIndex && !isHourStart) {
+    //         this.eventRowSpan = nextHourIndex - rowIndex;
+    //         // dataLength --;
+    //         return true;
+    //       }
+    //       // if (rowIndex > eventEndIndex) {
+    //       //   this.eventRowSpan = 1;
+    //       //   return true;
+    //       // }
+
+    //       // if ( rowIndex >= eventStartIndex && rowIndex < eventEndIndex) {
+    //       //   const x = this.hourly.filter(elm => {
+    //       //     const i = this.time.indexOf(elm);
+    //       //     return i < eventEndIndex && i > eventStartIndex;
+    //       //   });
+    //       //   const spanLength = x.length;
+    //       //   console.log('x..................', x);
+    //       //   this.eventRowSpan = spanLength === 0 ? 1 : spanLength + 1;
+    //       //   console.log('eventRowSpan........', this.eventRowSpan);
+    //       //   return true;
+    //       // }
+    //     });
+    //     // return true;
+    //   } else {
+    //     // const x = this.hourly.map(hour => {
+    //     //   const hourIndex = this.time.indexOf(hour);
+    //     //   if (rowIndex === hourIndex) {
+    //     //     this.eventRowSpan = 12;
+    //     //   }
+    //     //   // return true;
+    //     // });
+    //     this.hourlySpan(rowIndex);
+    //     return true;
+    //   }
+    //   // this.eventRowSpan = 1;
+    //   // return true;
+    // }
+
+      // showEvents(currentTime, index) {
+  //   if (this.eventRowSpan > 1) {
+  //     this.eventRowSpan --;
+  //     return false;
+  //   }
+  //   const localData = localStorage.getItem(this.localStorageVariable);
+  //   const data = JSON.parse(localData);
+  //   // this.toCheckEvents = data;
+  //   const filteredArray = this.generateFilteredArray(data);
+  //   const datalength = this.toCheckEvents.length;
+  //   if (datalength > 0) {
+  //     return this.eventSpan(this.toCheckEvents, filteredArray, currentTime, index);
+  //     // return true;
+  //   }
+  //   return this.hourlySpan(index);
+  // }
+
+
+    // // after changing span for 1 event that event must not be checked again
+  // eventSpan(checkList, filteredArray, currentRowTime, currentTimeIndex): boolean {
+  //   return checkList.map(event => {
+  //     const eventStartIndex = event.startTimeIndex;
+  //     const eventEndIndex = event.endTimeIndex;
+  //     const eventLength = event.eventLength;
+  //     const nextHourIndex = this.findNextHourIndex(currentTimeIndex);
+  //     const lastHourINdex = this.findLastHourINdex(currentTimeIndex);
+  //     const isHourStart = this.findIsHourStart(currentRowTime);
+  //     const nextHourAfterEventStart = this.findNextHourIndex(eventStartIndex);
+  //     const nextHourAfterEventEnd = this.findNextHourIndex(eventEndIndex);
+  //     const isEventChecked = this.checkedEvents.some(obj => {
+  //       return obj.startTimeIndex === event.startTimeIndex && obj.endTimeIndex === event.endTimeIndex;
+  //     });
+  //     if (isEventChecked && isHourStart && currentTimeIndex >= eventEndIndex) {
+  //       return this.hourlySpan(currentTimeIndex);
+  //     }
+  //     if (isEventChecked && !isHourStart && currentTimeIndex === eventEndIndex) {
+  //       this.eventRowSpan = currentTimeIndex - nextHourIndex;
+  //       return true;
+  //     }
+  //     if (currentTimeIndex < eventStartIndex && nextHourIndex <= eventStartIndex) {
+  //       return this.hourlySpan(currentTimeIndex);
+  //     }
+  //     // if (currentTimeIndex === eventStartIndex && !isHourStart) {
+
+  //     // }
+  //     if (isHourStart && eventStartIndex < nextHourIndex && eventStartIndex !== currentTimeIndex && eventStartIndex > currentTimeIndex) {
+  //       this.eventRowSpan = (eventStartIndex - currentTimeIndex) ;
+  //       return true;
+  //     }
+  //     if (isEventChecked && !isHourStart && eventEndIndex === currentTimeIndex) {
+  //       this.eventRowSpan = currentTimeIndex - nextHourIndex;
+  //       return true;
+  //     }
+  //     if ( currentTimeIndex === eventStartIndex) {
+  //       console.log('checkList', this.toCheckEvents);
+  //       console.log('before', this.eventRowSpan);
+  //       this.eventRowSpan = eventLength;
+  //       // this.toCheckEvents.pop();
+  //       this.checkedEvents.push(event);
+  //       console.log('after', this.eventRowSpan);
+  //       console.log('checkList', this.toCheckEvents);
+  //       return true;
+  //     }
+  //     // if (currentTimeIndex === eventEndIndex + 1 && ) {}
+
+  //     // if (currentRowTime < eventStartIndex && nextHourIndex < eventStartIndex) {
+  //     //   return this.hourlySpan(currentRowTime);
+  //     // }
+  //     // if (eventStartIndex < nextHourIndex) {
+  //     //   this.eventRowSpan = eventLength + 1;
+  //     //   return true;
+  //     // }
+  //     // if (currentTimeIndex > eventStartIndex && currentTimeIndex < eventEndIndex) {
+  //     //   // dataLength --;
+  //     //   return true;
+  //     // }
+  //     // if (nextHourIndex < eventStartIndex) {
+  //     //   return this.hourlySpan(currentTimeIndex);
+  //     // }
+  //     // if (currentTimeIndex < eventStartIndex && eventStartIndex < nextHourIndex) {
+  //     //   this.eventRowSpan = eventStartIndex - currentTimeIndex;
+  //     //   // dataLength --;
+  //     //   return true;
+  //     // }
+  //     // // if (currentTimeIndex === eventStartIndex) {
+  //     // //   this.eventRowSpan = eventLength + 1;
+  //     // //   dataLength --;
+  //     // //   return true;
+  //     // // }
+  //     // if (currentTimeIndex === eventEndIndex && !isHourStart) {
+  //     //   this.eventRowSpan = nextHourIndex - currentTimeIndex;
+  //     //   // dataLength --;
+  //     //   return true;
+  //     // }
+  //   });
+  // }
+
+    // showAllEvents(index) {
+  //   const data = localStorage.getItem(this.localStorageVariable);
+  //   const localData = JSON.parse(data);
+  //   this.toCheckEvents = localData;
+  //   // let filteredArray = localData;
+  //   // if (this.lastEventIndex !== index) {
+  //   //   filteredArray = this.generateFilteredArray(localData);
+  //   // }
+  //   // const dataLength = localData.length;
+  //   // for (let i = 0; i < dataLength; i++) {
+  //   //   this.xTime = localData[i].startTimeIndex;
+  //   //   if (localData[i].startTimeIndex === index) {
+  //   //     const eventLength = localData[i].eventLength;
+  //   //     this.eventHeight = eventLength * this.default5MinRowLength;
+  //   //     this.eventTop = this.overlayTop + (this.default5MinRowLength * index);
+  //   //     console.log('eventLength & event', eventLength, event);
+  //   //     console.log('function ran', this.x++);
+  //   //     this.checkedEvents.push(localData[i]);
+  //   //     this.lastEventIndex = index;
+  //   //     return true;
+  //   //   }
+  //   //   this.eventHeight = this.default5MinRowLength;
+  //   //   return false;
+  //   // }
+  //   /////////
+  //   let filteredArray = localData;
+  //   if (this.lastEventIndex !== index) {
+  //     filteredArray = this.generateFilteredArray(localData);
+  //   }
+  //   // const filteredArray = this.generateFilteredArray(localData);
+  //   const filteredLength = filteredArray.length;
+  //   const dataLength = localData.length;
+  //   for (let i = 0; i < filteredLength; i++) {
+  //     this.xTime = filteredArray[i].startTimeIndex;
+  //     if (filteredArray[i].startTimeIndex === index) {
+  //       const eventLength = filteredArray[i].eventLength;
+  //       this.eventHeight = eventLength * this.default5MinRowLength;
+  //       this.eventTop = this.overlayTop + (this.default5MinRowLength * index);
+  //       console.log('eventLength & event', eventLength, event);
+  //       console.log('function ran', this.x++);
+  //       this.checkedEvents.push(filteredArray[i]);
+  //       this.lastEventIndex = index;
+  //       return true;
+  //     }
+  //     this.eventHeight = this.default5MinRowLength;
+  //     return false;
+  //   }
+  //   this.eventHeight = this.default5MinRowLength;
+  //   return false;
+  //   /////////
+  //   // const checkEvent = localData.map(event => {
+  //   //   this.xTime = event.startTimeIndex;
+  //   //   const isEventChecked = this.checkedEvents.some(obj => {
+  //   //     return obj.startTimeIndex === event.startTimeIndex && obj.endTimeIndex === event.endTimeIndex;
+  //   //   });
+  //   //   if (event.startTimeIndex === index) {
+  //   //     const lastIndex = event.endTimeIndex;
+  //   //     const eventLength = event.eventLength;
+  //   //     this.eventHeight = eventLength * this.default5MinRowLength;
+  //   //     this.eventTop = this.overlayTop + (this.default5MinRowLength * index);
+  //   //     console.log('eventLength & event', eventLength, event);
+  //   //     console.log('function ran', this.x++);
+  //   //     this.checkedEvents.push(event);
+  //   //     this.lastEventIndex = index;
+  //   //     return true;
+  //   //   }
+  //   //   this.eventHeight = this.default5MinRowLength;
+  //   //   return false;
+  //   // });
+  //   // return checkEvent[0];
+  // }
+
+    // hourlySpan(rowIndex) {
+  //   // const x = this.hourly.map(hour => {
+  //   //   const hourIndex = this.time.indexOf(hour);
+  //   //   if (rowIndex === hourIndex) {
+  //   //     this.eventRowSpan = 12;
+  //   //   }
+  //   // });
+  //   const hourlyIndexes = this.hourly.map(hour => {
+  //     return this.time.indexOf(hour);
+  //   });
+  //   const checkCurrentIndex = hourlyIndexes.filter(i => i === rowIndex);
+  //   if (checkCurrentIndex.length > 0) {
+  //       this.eventRowSpan = 12;
+  //       return true;
+  //   }
+  //   return false;
+  // }
+
+  // provideRowspan(currentValue) {
+  //   if (this.eventData === undefined) {
+  //     return 1;
+  //   }
+  //   const currentRowIndex = this.eventData.time.indexOf(currentValue);
+  //   const nextRowIndex = currentRowIndex + 12;
+  //   const eventStartIndex = this.eventData.startTimeIndex;
+  //   const eventEndIndex = this.eventData.endTimeIndex;
+  //   // starttime is between the currentIndex and NexINdex and endTime is greater than nextIndex then rowspan = 2 or else 1
+  //   if (eventStartIndex >= currentRowIndex && eventEndIndex > nextRowIndex) {
+  //     return 2;
+  //   }
+  //   // if (currentRowIndex >= eventStartIndex && currentRowIndex <= eventEndIndex) {
+  //     // start at 18
+  //     // end at 30
+  //     // current is 24
+  //     // then rowspan should be 2
+  //   // }
+  //   return 1;
+  // }
+
+  // handleRowspan(data) {
+  //   const eventStartIndex = data.startTimeIndex;
+  //   const eventEndIndex = data.endTimeIndex;
+  //   const length = this.time.length;
+  //   const x = eventStartIndex / 12;
+  // }

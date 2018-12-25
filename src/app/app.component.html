@@ -5,13 +5,11 @@
         <thead>
           <tr>
             <th scope="col" class="width:10%">Time</th>
-            <!-- <th scope="col" class="width:90%">Events</th> -->
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let x of time; let i = index">
             <th scope="row" *ngIf="i % 12 === 0" style="padding-top: 0px; padding-bottom: 24px">{{x}}</th> <!-- [attr.rowspan]="timeRowSpan" *ngIf="showHour(x, i)" -->
-            <!-- <td *ngIf="i % 12 === 0">{{x}}</td> -->
           </tr>
         </tbody>
       </table>
@@ -20,7 +18,6 @@
       <table class="table table-bordered">
         <thead>
           <tr>
-            <!-- <th scope="col" class="width:10%">Time</th> -->
             <th scope="col" class="width:90%">Events</th>
           </tr>
         </thead>
@@ -28,11 +25,37 @@
           <tr *ngFor="let x of time; let i = index">
             <td *ngIf="i % 12 === 0">
               No Event Here....
-              <!-- <app-event [eventData]="eventData" [timeData]="timeData" [rowValue]="x"></app-event> -->
             </td>
           </tr>
         </tbody>
       </table>
+        <div class="col" *ngFor="let event of eventsArrayNew" style="padding: 0px; position: absolute; top: 50px" [style.top.px]="eventTop" [style.left.%]="eventLeft" [style.width.%]="eventWidth">
+          <table class="table">
+            <tbody> <!-- *ngIf="haveEvents()" -->
+              <tr *ngFor="let x of time; let i = index">
+                <div class="card text-white bg-primary border-light" style="display: none" [ngStyle]="{'display': checkAndShowEvent(i, event) ? 'block' : 'none'}" [style.height.px]="eventHeight"> <!-- || isCheckedEvent(i) [ngClass]="{'border-light': isOverlaping}" -->
+                    <div class="card-body">
+                      <h5 class="card-title">{{event.eventName}}</h5>
+                    </div>
+                  </div>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+    </div>
+    <button mat-raised-button (click)="openPopup()" mat-fab class="btn pmd-btn-fab pmd-ripple-effect btn-info pull-right fab"
+      type="button"><i class="material-icons pmd-sm">add</i></button>
+  </div>
+
+</app-layout>
+
+
+
+
+
+
+
+
       <!-- <div class="col" style="padding: 0px; position: absolute; top: 50px" [style.top.px]="eventTop">
           <table class="table"> -->
             <!-- <tbody *ngIf="haveEvents()"> *ngIf="haveEvents()" -->
@@ -48,27 +71,5 @@
             </tbody>
           </table>
         </div> -->
-        <div class="col" *ngFor="let event of eventsArrayNew" style="padding: 0px; position: absolute; top: 50px" [style.top.px]="eventTop">
-          <table class="table">
-            <tbody> <!-- *ngIf="haveEvents()" -->
-              <tr *ngFor="let x of time; let i = index">
-                <!-- <td *ngIf="showAllEvents(i)" [style.height.px]="eventHeight">*ngIf="i % 12 === 0" Each row length is 50px then devide into 12 parts -->
-                  <!-- New Event Here....! {{xTime}}
-                </td> -->
-                <!-- [ngStyle]="{'display': showAllEvents(i) ? 'block' : 'none'}" -->
-                <td style="display: none; background-color: gray" [ngStyle]="{'display': checkAndShowEvent(i, event) ? 'block' : 'none'}" [style.height.px]="eventHeight"> <!-- || isCheckedEvent(i) -->
-                  New Event Here....! {{xTime}}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-    </div>
-    <button mat-raised-button (click)="openPopup()" mat-fab class="btn pmd-btn-fab pmd-ripple-effect btn-info pull-right fab"
-      type="button"><i class="material-icons pmd-sm">add</i></button>
-  </div>
-
-</app-layout>
-
 
 
