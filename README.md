@@ -1,6 +1,22 @@
-# Calendar1
+# Day-Calendar
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.1.2.
+
+## Usage
+
+**clone** this project by using `git clone` and install all required packages using below command in project directory:
+> npm install
+
+Then run the project by using:
+> ng serve
+
+In the project you can **Add new event** with a name and giving a start time & end time. To add an event press on the `+` button in the bottom-right corner.
+
+You can add over-laping events.
+
+You can delete any event by pressing `X` button on top-right corner of the event.
+
+You can add events in minutes i.e **with 5 mins diff**
 
 ## Development server
 
