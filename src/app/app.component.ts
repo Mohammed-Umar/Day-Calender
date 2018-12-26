@@ -9,6 +9,7 @@ import { MatDialog } from '@angular/material';
 
 import { PopupComponent } from './popup/popup.component';
 import { listLazyRoutes } from '@angular/compiler/src/aot/lazy_routes';
+import { AlertComponent } from './alert/alert.component';
 
 @Component({
   selector: 'app-root',
@@ -59,6 +60,8 @@ export class AppComponent implements OnInit, AfterContentChecked {
 
   isOverlaping = false;
 
+  modalDisplay = 'none';
+
   // Temp Variables
 
   lastEventIndex;
@@ -80,10 +83,11 @@ export class AppComponent implements OnInit, AfterContentChecked {
     time: this.time
   };
 
-  constructor(public popup: MatDialog, private _cdRef: ChangeDetectorRef) { }
+  constructor(public dailog: MatDialog, private _cdRef: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.generateHoursAndMins();
+    this.checkedEvents = [];
     const localData = localStorage.getItem(this.localStorageVariable);
     if (localData === 'undefined' || localData === null) {
       const dataToStore = [];
@@ -94,7 +98,7 @@ export class AppComponent implements OnInit, AfterContentChecked {
   }
 
   openPopup(): void {
-    const openPopup = this.popup.open(PopupComponent, {
+    const openPopup = this.dailog.open(PopupComponent, {
       width: '500px',
       data: {
         eventName: this.eventName,
@@ -108,18 +112,24 @@ export class AppComponent implements OnInit, AfterContentChecked {
 
     // this function should exicute only on new event & make all fields of event form mandatory.
     openPopup.afterClosed().subscribe(eventData => {
-      console.log('One event is added');
+      if (eventData === undefined) {
+        return null;
+      }
       this.eventData = eventData;
-      console.log('Start Time', this.eventData.eventStartTime);
-      console.log('End Time', this.eventData.eventEndTime);
       this.calculateNewEventLength(this.eventData);
     });
+
+  }
+
+  showAlert(): void {
+    this.dailog.open(AlertComponent);
   }
 
   calculateNewEventLength(data) {
-    // if (this.isAlreadyExist(data)) {
-
-    // }
+    if (this.isAlreadyExist(data)) {
+      this.showAlert();
+      return null;
+    }
     const dataToStore = this.eventsArrayNew;
     const startTime = data.eventStartTime;
     const endTime = data.eventEndTime;
@@ -238,15 +248,17 @@ export class AppComponent implements OnInit, AfterContentChecked {
       const eventLength = currentEvent.eventLength;
       this.eventHeight = eventLength * this.default5MinRowLength;
       this.eventTop = this.overlayTop + (this.default5MinRowLength * index);
-      console.log('eventLength & event', eventLength, event);
-      console.log('function ran', this.x++);
-      this.checkedEvents.push(currentEvent);
+      const checkIfAlreadyAdded = this.isAlreadyExist(currentEvent);
+      if (!checkIfAlreadyAdded) {
+        this.checkedEvents.push(currentEvent);
+      }
       this.lastEventIndex = index;
       return true;
     }
     this.eventHeight = this.default5MinRowLength;
     return false;
   }
+
   checkIfOverlaping(event) {
     return this.checkedEvents.some(obj => {
       if (this.isOneInAnother(event) || this.isSomePartOverlaping(event)) {
@@ -299,8 +311,10 @@ export class AppComponent implements OnInit, AfterContentChecked {
     event.startTimeIndex === checkingObj.startTimeIndex && event.endTimeIndex === checkingObj.endTimeIndex
 
   isAlreadyExist(event) {
+    const eventStartIndex = this.time.indexOf(event.eventStartTime);
+    const eventEndIndex = this.time.indexOf(event.eventEndTime);
     return this.checkedEvents.some(obj => {
-      return event.startTimeIndex === obj.startTimeIndex && event.endTimeIndex === obj.endTimeIndex;
+      return eventStartIndex === obj.startTimeIndex && eventEndIndex === obj.endTimeIndex;
     });
   }
 
@@ -338,6 +352,7 @@ export class AppComponent implements OnInit, AfterContentChecked {
     }
     return isHourStart;
   }
+
 }
 
 export interface PopupData {

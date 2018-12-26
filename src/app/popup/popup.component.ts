@@ -15,21 +15,27 @@ export class PopupComponent implements OnInit {
 
   public endTime;
 
+  public timeArray;
+
+  public endTimeArray;
+
   constructor(
     public dailogRef: MatDialogRef<PopupComponent>,
     @Inject(MAT_DIALOG_DATA) public data: PopupData) { }
 
   ngOnInit() {
+    this.timeArray = this.data.time;
   }
 
   onNoClick(): void {
     this.dailogRef.close();
   }
 
-  onStartTimeSelection() {
-
+  onStartTimeSelection(startTime, startTimeIndex) {
+    const filteredArray = this.timeArray.filter((time, index) => {
+      return index > startTimeIndex;
+    });
+    this.endTimeArray = filteredArray;
   }
-
-  onEndtimeSelection() {}
 
 }

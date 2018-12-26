@@ -19,14 +19,19 @@ import {
   MatSelectModule } from '@angular/material';
 import { PopupComponent } from './popup/popup.component';
 import { EventComponent } from './event/event.component';
+import { AlertComponent } from './alert/alert.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     PopupComponent,
-    EventComponent
+    EventComponent,
+    AlertComponent
   ],
-  entryComponents: [PopupComponent],
+  entryComponents: [
+    PopupComponent,
+    AlertComponent
+  ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,

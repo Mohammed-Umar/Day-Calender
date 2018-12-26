@@ -16,7 +16,7 @@
                   <div class="col-md-6">
                     <mat-form-field>
                       <mat-select [(value)]="data.eventStartTime" placeholder="Start Time">
-                        <mat-option *ngFor="let time of data.time" (click)="onStartTimeSelection()" [value]="time">
+                        <mat-option *ngFor="let time of timeArray; let i = index" (click)="onStartTimeSelection(time, i)" [value]="time">
                           {{time}}
                         </mat-option>
                       </mat-select>
@@ -25,7 +25,7 @@
                   <div class="col-md-6">
                     <mat-form-field>
                       <mat-select [(value)]="data.eventEndTime" placeholder="End Time">
-                        <mat-option *ngFor="let time of data.time" (click)="onEndtimeSelection()" [value]="time">
+                        <mat-option *ngFor="let time of endTimeArray" [value]="time">
                           {{time}}
                         </mat-option>
                       </mat-select>
