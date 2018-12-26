@@ -162,12 +162,13 @@ export class AppComponent implements OnInit, AfterContentChecked {
    * @param event current event data.
    */
   deleteEvent(event): void {
-    const data = localStorage.getItem(this.localStorageVariable);
-    const localData = JSON.parse(data);
-    const updatedArray = localData.filter(obj => {
+    // const data = localStorage.getItem(this.localStorageVariable);
+    // const localData = JSON.parse(data);
+    const updatedArray = this.checkedEvents.filter(obj => {
       return !this._isExistCondition(event, obj);
     });
     localStorage.setItem(this.localStorageVariable, JSON.stringify(updatedArray));
+    this.checkedEvents = updatedArray;
     this.eventsArray = updatedArray;
   }
 
