@@ -100,6 +100,7 @@ export class AppComponent implements OnInit, AfterContentChecked {
   openPopup(): void {
     const openPopup = this.dailog.open(PopupComponent, {
       width: '500px',
+      height: '300px',
       data: {
         eventName: this.eventName,
         eventStartTime: this.eventStartTime,

@@ -29,33 +29,32 @@
           </tr>
         </tbody>
       </table>
-        <div class="col" *ngFor="let event of eventsArrayNew" style="padding: 0px; position: absolute; top: 50px" [style.top.px]="eventTop" [style.left.%]="eventLeft" [style.width.%]="eventWidth">
-          <table class="table">
-            <tbody>
-              <tr *ngFor="let x of time; let i = index">
-                <div class="card text-white bg-primary border-light" style="display: none" [ngStyle]="{'display': checkAndShowEvent(i, event) ? 'block' : 'none'}" [style.height.px]="eventHeight">
-                    <div class="card-body">
-                        <div class="row">
-                            <!-- <div class="col-11"> -->
-                              <h6 class="card-title">{{event.eventName}}</h6>
-                            <!-- </div> -->
-                            <div style="top:10px;right:10px; position: absolute">
-                                <a (click)="deleteEvent(event)">
-                                  <i class="material-icons pull-right">close</i>
-                                </a>
-                            </div>
-                        </div>
+      <div class="col" *ngFor="let event of eventsArrayNew" style="padding: 0px; position: absolute; top: 50px"
+        [style.top.px]="eventTop" [style.left.%]="eventLeft" [style.width.%]="eventWidth">
+        <table class="table">
+          <tbody>
+            <tr *ngFor="let x of time; let i = index">
+              <div class="card text-white bg-primary border-light" style="display: none" [ngStyle]="{'display': checkAndShowEvent(i, event) ? 'block' : 'none'}"
+                [style.height.px]="eventHeight">
+                <div class="card-body">
+                  <div class="row">
+                    <!-- <div class="col-11"> -->
+                    <h6 class="card-title">{{event.eventName}}</h6>
+                    <!-- </div> -->
+                    <div style="top:10px;right:10px; position: absolute">
+                      <a (click)="deleteEvent(event)">
+                        <i class="material-icons pull-right">close</i>
+                      </a>
                     </div>
                   </div>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                </div>
+              </div>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <button mat-raised-button (click)="openPopup()" mat-fab class="btn pmd-btn-fab pmd-ripple-effect btn-info pull-right fab"
       type="button"><i class="material-icons pmd-sm">add</i></button>
   </div>
 </app-layout>
-
-
-

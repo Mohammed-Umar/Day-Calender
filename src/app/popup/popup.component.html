@@ -1,48 +1,43 @@
 <div class="row">
   <div class="span6" style="float: none; margin: 0 auto;">
-    <h1 mat-dialog-title class="col-md-12">Add new event</h1>      
+    <h1 mat-dialog-title class="col-md-12">Add new event</h1>
   </div>
 </div>
 <div class="row">
   <div class="col-md-12">
-      <div mat-dialog-content>
-          <form>
-              <div class="row">
-                  <div class="col-md-12">
-                    <mat-form-field class="example-full-width">
-                      <input matInput type="text" placeholder="Name" name="Name" [(ngModel)]="data.eventName" required>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-6">
-                    <mat-form-field>
-                      <mat-select [(value)]="data.eventStartTime" placeholder="Start Time">
-                        <mat-option *ngFor="let time of timeArray; let i = index" (click)="onStartTimeSelection(time, i)" [value]="time">
-                          {{time}}
-                        </mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </div>
-                  <div class="col-md-6">
-                    <mat-form-field>
-                      <mat-select [(value)]="data.eventEndTime" placeholder="End Time">
-                        <mat-option *ngFor="let time of endTimeArray" [value]="time">
-                          {{time}}
-                        </mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                  </div>
-              </div>
-          </form>
-        <!-- <p>Name of the Event</p>
-        <mat-form-field>
-          <input matInput [(ngModel)]="data.eventName">
-        </mat-form-field> -->
-      </div>
+    <div mat-dialog-content>
+      <form style="height:200px" [formGroup]="addNewForm">
+        <div class="row">
+          <div class="col-md-12">
+            <mat-form-field class="example-full-width">
+              <input matInput type="text" placeholder="Name" name="Name" [(value)]="data.eventName" required>
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field>
+              <mat-select [(value)]="data.eventStartTime" placeholder="Start Time" [formControl]="startTimeFormControl">
+                <mat-option *ngFor="let time of timeArray; let i = index" (click)="onStartTimeSelection(time, i)"
+                  [value]="time">
+                  {{time}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field>
+              <mat-select [(value)]="data.eventEndTime" placeholder="End Time" [formControl]="endTimeFormControl">
+                <mat-option *ngFor="let time of endTimeArray" [value]="time">
+                  {{time}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+        <div mat-dialog-actions class="row" align="end">
+          <button mat-button (click)="onNoClick()">Cancel</button>
+          <button mat-button [mat-dialog-close]="data" [disabled]="addNewForm.invalid">Add</button>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
-<div mat-dialog-actions class="row">
-  <!-- <div class="span6" style="float: none; margin: 0 auto;"> -->
-    <button mat-button (click)="onNoClick()">Cancel</button>
-    <button mat-button [mat-dialog-close]="data" cdkFocusInitial>Add</button>
-  <!-- </div> -->
 </div>

@@ -1,5 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
+
 import { PopupData } from '../app.component';
 
 @Component({
@@ -11,13 +13,18 @@ export class PopupComponent implements OnInit {
 
   // Make end time dropdown a cascadding dropdown
 
-  public startTime;
-
-  public endTime;
-
   public timeArray;
 
   public endTimeArray;
+
+  startTimeFormControl: FormControl = new FormControl('', Validators.required);
+
+  endTimeFormControl: FormControl = new FormControl('', Validators.required);
+
+  addNewForm: FormGroup = new FormGroup({
+    startTime: this.startTimeFormControl,
+    endTime: this.endTimeFormControl
+  });
 
   constructor(
     public dailogRef: MatDialogRef<PopupComponent>,
