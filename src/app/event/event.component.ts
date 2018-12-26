@@ -17,15 +17,9 @@ export class EventComponent implements OnInit, OnChanges {
   constructor() { }
 
   ngOnInit() {
-    console.log('OnInit', this.eventData);
-    // console.log('OnInit', this.currentIndex);
-    console.log('OnInit', this.rowValue);
   }
 
   ngOnChanges() {
-    console.log('OnChanges', this.eventData);
-    // console.log('OnChanges', this.currentIndex);
-    console.log('OnChanges', this.rowValue);
   }
 
   checkIfEvent(returnValue?: boolean) {
@@ -37,10 +31,6 @@ export class EventComponent implements OnInit, OnChanges {
         return true;
       }
     }
-    // const currentRowIndex = this.eventData.time.indexOf(this.rowValue);
-    // if (currentRowIndex >= this.eventData.startTimeIndex && currentRowIndex <= this.eventData.endTimeIndex) {
-    //   return true;
-    // }
     return false;
   }
 
