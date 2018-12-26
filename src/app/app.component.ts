@@ -1,9 +1,3 @@
-/*
-Add a logic in this component to compare the currentIndex with rowSpan.
-Add 12 td's in eventComponent
-Save the events data somewhere
-when events overlap devide one td into to td's one small and one big and even merge td's
-*/
 import { Component, OnInit, AfterContentChecked, ChangeDetectorRef } from '@angular/core';
 import { MatDialog } from '@angular/material';
 
@@ -17,86 +11,60 @@ import { AlertComponent } from './alert/alert.component';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit, AfterContentChecked {
-  eventName = '(No title)';
-  eventStartTime: TimeObj;
-  eventEndTime: TimeObj;
 
-  newEventLength: any;
+  public eventName = '(No title)';
+  public eventStartTime: TimeObj;
+  public eventEndTime: TimeObj;
 
-  hours: Array<any> = [];
-  mins: Array<any> = [];
-  time: Array<any> = [];
-  hourly: Array<any> = [];
+  public hours: Array<any> = [];
+  public mins: Array<any> = [];
+  public time: Array<any> = [];
+  public hourly: Array<any> = [];
 
-  eventRowSpan = 1;
+  public eventData: PopupData;
 
-  timeRowSpan = 1;
+  public localStorageVariable = 'data';
 
-  eventData: PopupData;
+  public checkedEvents: Array<any> = [];
 
-  eventsArray: Array<any> = [];
-
-  localStorageVariable = 'data';
-
-  toCheckEvents: Array<any> = [];
-
-  checkedEvents: Array<any> = [];
-
-  eventsArrayNew: Array<any> = [];
+  public eventsArray: Array<any> = [];
 
   /*
    * Variables related to DOM
    */
 
-  eventHeight: number;
+  public eventHeight: number;
 
-  eventTop: number;
+  public eventTop: number;
 
-  eventLeft = 0;
+  public eventLeft = 0;
 
-  eventWidth = 100;
+  public eventWidth = 100;
 
-  overlayTop = 50;
+  public overlayTop = 50;
 
-  isOverlaping = false;
+  public isOverlaping = false;
 
-  modalDisplay = 'none';
+  public default1HourRowLength = 49;
 
-  // Temp Variables
-
-  lastEventIndex;
-
-  xTime;
-
-  default1HourRowLength = 49;
-
-  default5MinRowLength = this.default1HourRowLength / 12;
-
-  x = 0;
-
-  // haveEvents = false;
-
-  timeData = {
-    hours: this.hours,
-    mins: this.mins,
-    hourly: this.hourly,
-    time: this.time
-  };
+  public default5MinRowLength = this.default1HourRowLength / 12;
 
   constructor(public dailog: MatDialog, private _cdRef: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.generateHoursAndMins();
-    this.checkedEvents = [];
     const localData = localStorage.getItem(this.localStorageVariable);
     if (localData === 'undefined' || localData === null) {
       const dataToStore = [];
       localStorage.setItem(this.localStorageVariable, JSON.stringify(dataToStore));
     } else {
-      this.eventsArrayNew = JSON.parse(localData);
+      this.eventsArray = JSON.parse(localData);
     }
   }
 
+  /**
+   * @function openPopup is used to open the popup to create a event.
+   */
   openPopup(): void {
     const openPopup = this.dailog.open(PopupComponent, {
       width: '500px',
@@ -111,7 +79,6 @@ export class AppComponent implements OnInit, AfterContentChecked {
       }
     });
 
-    // this function should exicute only on new event & make all fields of event form mandatory.
     openPopup.afterClosed().subscribe(eventData => {
       if (eventData === undefined) {
         return null;
@@ -119,19 +86,26 @@ export class AppComponent implements OnInit, AfterContentChecked {
       this.eventData = eventData;
       this.calculateNewEventLength(this.eventData);
     });
-
   }
 
+  /**
+   * @function showAlert used to give a alert to the user when already added event is added again.
+   */
   showAlert(): void {
     this.dailog.open(AlertComponent);
   }
 
-  calculateNewEventLength(data) {
+  /**
+   * @function calculateNewEventLength is a fire & forget function.
+   * This function is used to add required data to current event and store it in local storage.
+   * @param data is the current event basic data.
+   */
+  calculateNewEventLength(data): void {
     if (this.isAlreadyExist(data)) {
       this.showAlert();
       return null;
     }
-    const dataToStore = this.eventsArrayNew;
+    const dataToStore = this.eventsArray;
     const startTime = data.eventStartTime;
     const endTime = data.eventEndTime;
     const indexOfStartTime = this.time.indexOf(startTime);
@@ -147,13 +121,15 @@ export class AppComponent implements OnInit, AfterContentChecked {
       this.eventData.eventLeft = this.setEventLeft(data);
       this.eventData.eventWidth = this.setEventWidth(data);
     }
-    console.log('length of the event is:::', length);
     dataToStore.push(this.eventData);
     localStorage.setItem(this.localStorageVariable, JSON.stringify(dataToStore));
-    // this.time = this.time.map((e) => e);
   }
 
-  setEventLeft(event) {
+  /**
+   * This function is used to set the left, a style property of the event.
+   * @param event is the current event.
+   */
+  setEventLeft(event): number {
     const data = localStorage.getItem(this.localStorageVariable);
     const localData = JSON.parse(data);
     const parentEvent = localData.find(obj => {
@@ -165,7 +141,11 @@ export class AppComponent implements OnInit, AfterContentChecked {
     return parentEvent.eventLeft + 15;
   }
 
-  setEventWidth(event) {
+  /**
+   * This function is used to set the width, a style property of the event.
+   * @param event is the current event.
+   */
+  setEventWidth(event): number {
     const data = localStorage.getItem(this.localStorageVariable);
     const localData = JSON.parse(data);
     const parentEvent = localData.find(obj => {
@@ -177,31 +157,30 @@ export class AppComponent implements OnInit, AfterContentChecked {
     return parentEvent.eventWidth - 15;
   }
 
-  deleteEvent(event) {
+  /**
+   * This function is used to delete the events that are added.
+   * @param event current event data.
+   */
+  deleteEvent(event): void {
     const data = localStorage.getItem(this.localStorageVariable);
     const localData = JSON.parse(data);
     const updatedArray = localData.filter(obj => {
       return !this._isExistCondition(event, obj);
     });
     localStorage.setItem(this.localStorageVariable, JSON.stringify(updatedArray));
-    this.eventsArrayNew = updatedArray;
+    this.eventsArray = updatedArray;
   }
 
-  haveEvents() {
-    const data = localStorage.getItem(this.localStorageVariable);
-    const localData = JSON.parse(data);
-    return localData.length > 0 ? true : false;
-  }
-
-  generateHoursAndMins() {
+  /**
+   * This function will generate the basic static data that is required.
+   */
+  generateHoursAndMins(): void {
     for (let i = 0; i < 24; i++) {
       i < 10 ? this.hours.push('0' + i) : this.hours.push(i.toString());
-      // this.hours[i] = i;
     }
     for (let i = 0; i <= 55; i++) {
       if (i % 5 === 0) {
         i < 10 ? this.mins.push('0' + i) : this.mins.push(i.toString());
-        // this.mins.push(i);
       }
     }
     for (let i = 0; i < this.hours.length; i++) {
@@ -220,23 +199,12 @@ export class AppComponent implements OnInit, AfterContentChecked {
     this._cdRef.detectChanges();
   }
 
-  generateFilteredArray(eventsArray) {
-    return eventsArray.reduce((newArray, event) => {
-      if (this.checkedEvents.length > 0) {
-        const filter = this.checkedEvents.some(obj => {
-          return obj.startTimeIndex === event.startTimeIndex && obj.endTimeIndex === event.endTimeIndex;
-        });
-        if (!filter) {
-          newArray.push(event);
-          return newArray;
-        }
-        return newArray;
-      }
-      newArray.push(event);
-      return newArray;
-    }, []);
-  }
-
+  /**
+   * This is the MAIN function of this component.
+   * Event is created in the view only when this function @returns true.
+   * @param index is the index of current time in global variable time.
+   * @param currentEvent this is the event that to be shown.
+   */
   checkAndShowEvent(index, currentEvent) {
     if (currentEvent.startTimeIndex === index) {
       if (currentEvent.isOverlapEvent) {
@@ -253,13 +221,16 @@ export class AppComponent implements OnInit, AfterContentChecked {
       if (!checkIfAlreadyAdded) {
         this.checkedEvents.push(currentEvent);
       }
-      this.lastEventIndex = index;
       return true;
     }
     this.eventHeight = this.default5MinRowLength;
     return false;
   }
 
+  /**
+   * This function checks if an event is overlaping.
+   * @param event ic the current event data
+   */
   checkIfOverlaping(event) {
     return this.checkedEvents.some(obj => {
       if (this.isOneInAnother(event) || this.isSomePartOverlaping(event)) {
@@ -271,12 +242,22 @@ export class AppComponent implements OnInit, AfterContentChecked {
     });
   }
 
+  /**
+   * This is a anonymous function that @returns a condition.
+   */
   private _oneInAnotherCondition1 = (event, checkingObj) =>
     event.startTimeIndex >= checkingObj.startTimeIndex && event.endTimeIndex < checkingObj.endTimeIndex
 
+  /**
+   * This is a anonymous function that @returns a condition.
+   */
   private _oneInAnotherCondition2 = (event, checkingObj) =>
     event.endTimeIndex <= checkingObj.endTimeIndex && event.startTimeIndex > checkingObj.startTimeIndex
 
+  /**
+   * This function checks if an event is present in another event.
+   * @param event is the current event data
+   */
   isOneInAnother(event) {
     return this.checkedEvents.some(obj => {
       if (this._oneInAnotherCondition1(event, obj)) {
@@ -289,13 +270,23 @@ export class AppComponent implements OnInit, AfterContentChecked {
     });
   }
 
+  /**
+   * This is a anonymous function that @returns a condition.
+   */
   private _partialOverlapCondition1 = (event, checkingObj) =>
     event.startTimeIndex >= checkingObj.startTimeIndex && event.startTimeIndex < checkingObj.endTimeIndex &&
     event.endTimeIndex > checkingObj.endTimeIndex
 
+  /**
+   * This is a anonymous function that @returns a condition.
+   */
   private _partialOverlapCondition2 = (event, checkingObj) =>
     event.endTimeIndex <= checkingObj.endTimeIndex && event.endTimeIndex > checkingObj.startTimeIndex && event.startTimeIndex < checkingObj.startTimeIndex
 
+  /**
+   * This function checks if an events is partialy overlaping on another event.
+   * @param event is the current event data.
+   */
   isSomePartOverlaping(event) {
     return this.checkedEvents.some(obj => {
       if (this._partialOverlapCondition1(event, obj)) {
@@ -308,9 +299,16 @@ export class AppComponent implements OnInit, AfterContentChecked {
     });
   }
 
+  /**
+   * This is a anonymous function that @returns a condition.
+   */
   private _isExistCondition = (event, checkingObj) =>
     event.startTimeIndex === checkingObj.startTimeIndex && event.endTimeIndex === checkingObj.endTimeIndex
 
+  /**
+   * This function checks if provided event is already created.
+   * @param event is the current event data.
+   */
   isAlreadyExist(event) {
     const eventStartIndex = this.time.indexOf(event.eventStartTime);
     const eventEndIndex = this.time.indexOf(event.eventEndTime);
@@ -319,13 +317,31 @@ export class AppComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  isCheckedEvent(index) {
-    const isEventChecked = this.checkedEvents.some(obj => {
-      return obj.startTimeIndex === index;
-    });
-    return isEventChecked;
+  /**
+   * Unused @function
+   * @function generateFilteredArray is created to filter the current events array from the already added events.
+   */
+  generateFilteredArray(eventsArray): Array<any> {
+    return eventsArray.reduce((newArray, event) => {
+      if (this.checkedEvents.length > 0) {
+        const filter = this.checkedEvents.some(obj => {
+          return obj.startTimeIndex === event.startTimeIndex && obj.endTimeIndex === event.endTimeIndex;
+        });
+        if (!filter) {
+          newArray.push(event);
+          return newArray;
+        }
+        return newArray;
+      }
+      newArray.push(event);
+      return newArray;
+    }, []);
   }
 
+  /**
+   * Unused @function
+   * @function findNextHourIndex is created to find the index of next hour to current events start index.
+   */
   findNextHourIndex(index) {
     const allNextHours = this.hourly.filter(hour => {
       const hourIndex = this.time.indexOf(hour);
@@ -338,12 +354,20 @@ export class AppComponent implements OnInit, AfterContentChecked {
     return nextHourIndex;
   }
 
+  /**
+   * Unused @function
+   * @function findLastHourINdex is created to find the index of last passed hour ro current events start time index.
+   */
   findLastHourINdex(index) {
     const nextHourIndex = this.findNextHourIndex(index);
     return nextHourIndex - 1;
   }
 
-  findIsHourStart(currentTime) {
+  /**
+   * Unused @function
+   * @function findIsHourStart is created to check if current event index is at the start of an hour.
+   */
+  findIsHourStart(currentTime): boolean  {
     let isHourStart: boolean;
     const filterHourly = this.hourly.filter(hour => hour === currentTime);
     if (filterHourly.length > 0) {
@@ -362,13 +386,13 @@ export interface PopupData {
   eventEndTime: TimeObj;
   startTimeIndex: number;
   endTimeIndex: number;
-  hours: Array<any>;
-  mins: Array<any>;
-  time: Array<any>;
   eventLength: number;
   isOverlapEvent: boolean;
   eventLeft: number;
   eventWidth: number;
+  hours: Array<any>;
+  mins: Array<any>;
+  time: Array<any>;
 }
 
 export interface TimeObj {
@@ -710,4 +734,17 @@ export interface TimeObj {
   //   const eventEndIndex = data.endTimeIndex;
   //   const length = this.time.length;
   //   const x = eventStartIndex / 12;
+  // }
+
+    // haveEvents() {
+  //   const data = localStorage.getItem(this.localStorageVariable);
+  //   const localData = JSON.parse(data);
+  //   return localData.length > 0 ? true : false;
+  // }
+
+    // isCheckedEvent(index) {
+  //   const isEventChecked = this.checkedEvents.some(obj => {
+  //     return obj.startTimeIndex === index;
+  //   });
+  //   return isEventChecked;
   // }

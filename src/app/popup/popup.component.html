@@ -10,13 +10,13 @@
         <div class="row">
           <div class="col-md-12">
             <mat-form-field class="example-full-width">
-              <input matInput type="text" placeholder="Name" name="Name" [(value)]="data.eventName" required>
+              <input matInput type="text" placeholder="Name" name="Name" [(ngModel)]="data.eventName" [formControl]="eventNameFormControl" required>
             </mat-form-field>
           </div>
           <div class="col-md-6">
             <mat-form-field>
               <mat-select [(value)]="data.eventStartTime" placeholder="Start Time" [formControl]="startTimeFormControl">
-                <mat-option *ngFor="let time of timeArray; let i = index" (click)="onStartTimeSelection(time, i)"
+                <mat-option *ngFor="let time of timeArray; let i = index" (click)="onStartTimeSelection(i)"
                   [value]="time">
                   {{time}}
                 </mat-option>

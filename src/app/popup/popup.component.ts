@@ -11,17 +11,21 @@ import { PopupData } from '../app.component';
 })
 export class PopupComponent implements OnInit {
 
-  // Make end time dropdown a cascadding dropdown
-
   public timeArray;
 
   public endTimeArray;
+
+  /**
+   * Form Control variables
+   */
+  eventNameFormControl: FormControl = new FormControl('', Validators.required);
 
   startTimeFormControl: FormControl = new FormControl('', Validators.required);
 
   endTimeFormControl: FormControl = new FormControl('', Validators.required);
 
   addNewForm: FormGroup = new FormGroup({
+    eventName: this.eventNameFormControl,
     startTime: this.startTimeFormControl,
     endTime: this.endTimeFormControl
   });
@@ -38,7 +42,11 @@ export class PopupComponent implements OnInit {
     this.dailogRef.close();
   }
 
-  onStartTimeSelection(startTime, startTimeIndex) {
+  /**
+   * @function onStartTimeSelection is used to create a filtered end time list.
+   * @param startTimeIndex is the selected start time considered to create a filtered end time list.
+   */
+  onStartTimeSelection(startTimeIndex) {
     const filteredArray = this.timeArray.filter((time, index) => {
       return index > startTimeIndex;
     });

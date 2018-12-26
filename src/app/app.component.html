@@ -29,7 +29,7 @@
           </tr>
         </tbody>
       </table>
-      <div class="col" *ngFor="let event of eventsArrayNew" style="padding: 0px; position: absolute; top: 50px"
+      <div class="col" *ngFor="let event of eventsArray" style="padding: 0px; position: absolute; top: 50px"
         [style.top.px]="eventTop" [style.left.%]="eventLeft" [style.width.%]="eventWidth">
         <table class="table">
           <tbody>
@@ -38,9 +38,7 @@
                 [style.height.px]="eventHeight">
                 <div class="card-body">
                   <div class="row">
-                    <!-- <div class="col-11"> -->
                     <h6 class="card-title">{{event.eventName}}</h6>
-                    <!-- </div> -->
                     <div style="top:10px;right:10px; position: absolute">
                       <a (click)="deleteEvent(event)">
                         <i class="material-icons pull-right">close</i>
